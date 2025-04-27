@@ -372,7 +372,8 @@ impl RendezvousMediator {
                     if (!Config::get_key_confirmed() ||
                         !Config::get_host_key_confirmed(&host)) &&
                         last_register_sent.map(|x| x.elapsed().as_millis() as i64).unwrap_or(REG_INTERVAL) >= REG_INTERVAL {
-                        rz.register_pk(Sink::Stream(&mut conn)).await?;
+                        let framed_socket = FramedStream::new(socket);
+                        rz.register_pk(Sink::Stream(&mut framed_socket)).await?;
                         last_register_sent = Some(Instant::now());
                     }
                 }
