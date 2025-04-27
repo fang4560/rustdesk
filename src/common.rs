@@ -550,7 +550,8 @@ async fn test_nat_type_() -> ResultType<bool> {
             );
         }
         socket.send(&msg_out).await?;
-        if let Some(msg_in) = get_next_nonkeyexchange_msg(&mut socket, None).await {
+        let framed_socket = FramedStream::new(socket);
+        if let Some(msg_in) = get_next_nonkeyexchange_msg(&mut framed_socket, None).await {
             if let Some(rendezvous_message::Union::TestNatResponse(tnr)) = msg_in.union {
                 log::debug!("Got nat response from {}: port={}", server, tnr.port);
                 if i == 0 {
