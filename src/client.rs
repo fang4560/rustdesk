@@ -276,9 +276,9 @@ impl Client {
         let mut signed_id_pk = Vec::new();
         let mut relay_server = "".to_owned();
 
-        if !key.is_empty() && !token.is_empty() {
-            // mainly for the security of token
-            allow_err!(secure_tcp(&mut socket, key).await);
+        if !key.is_empty() && !token.is_empty() {  // mainly for the security of token
+            let framed_socket = FramedStream::new(socket);
+            allow_err!(secure_tcp(&mut framed_socket, key).await);
         }
 
         let start = std::time::Instant::now();
@@ -308,7 +308,8 @@ impl Client {
             socket.send(&msg_out).await?;
             // below timeout should not bigger than hbbs's connection timeout.
             if let Some(msg_in) =
-                crate::get_next_nonkeyexchange_msg(&mut socket, Some(i * 6000)).await
+                let framed_socket = FramedStream::new(socket);
+                crate::get_next_nonkeyexchange_msg(&mut framed_socket, Some(i * 6000)).await
             {
                 match msg_in.union {
                     Some(rendezvous_message::Union::PunchHoleResponse(ph)) => {
