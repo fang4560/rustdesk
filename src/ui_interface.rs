@@ -1367,7 +1367,8 @@ async fn check_id(
         let mut ok = false;
         if socket.send(&msg_out).await.is_ok() {
             if let Some(msg_in) =
-                crate::common::get_next_nonkeyexchange_msg(&mut socket, None).await
+                let framed_socket = FramedStream::new(socket);
+                crate::common::get_next_nonkeyexchange_msg(&mut framed_socket, None).await
             {
                 match msg_in.union {
                     Some(rendezvous_message::Union::RegisterPkResponse(rpr)) => {
